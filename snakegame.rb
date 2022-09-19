@@ -2,6 +2,8 @@ require 'ruby2d'
 set background: 'navy'
 set fps_cap: 10
 GRID_SIZE=20
+GRID_WIDTH = Window.width/GRID_SIZE
+GRID_HEIGHT = Window.height/GRID_SIZE
 class Snake
     attr_writer :direction
     def initialize
@@ -17,13 +19,13 @@ class Snake
         @positions.shift
         case @direction
         when 'down'
-            @positions.push([head[0],head[1]+1])
+            @positions.push(new_coords(head[0],head[1]+1))
         when 'up'
-            @positions.push([head[0],head[1]-1])
+            @positions.push(new_coords(head[0],head[1]-1))
         when 'left'
-            @positions.push([head[0]-1,head[1]])
+            @positions.push(new_coords(head[0]-1,head[1]))
         when 'right'
-            @positions.push([head[0]+1,head[1]])    
+            @positions.push(new_coords(head[0]+1,head[1]))    
         end
     end
     def can_change_direction_to?(new_direction)
@@ -34,19 +36,36 @@ class Snake
         when 'right' then new_direction != 'left'
         end
     end
+    def new_coords(x, y)
+        [x % GRID_WIDTH,y % GRID_HEIGHT]
+    end
 
     private 
     def head
         @positions.last
     end
 end
+
+class Game
+    def inititalize
+        @score=0
+        @ball_x=rand(GRID_WIDTH)
+        @ball_y=rand(GRID_HEIGHT)
+    end
+    def draw
+            Square.new(x: @ball_x*GRID_SIZE, y: @ball_y * GRID_SIZE,size:GRID_SIZE,color:'blue') 
+    end
+end
+
 snake=Snake.new
+game=Game.new
 
 update do
     clear
 
     snake.move
     snake.draw
+    game.draw
 end
 on :key_down do |event|
     if ['up', 'down','left','right'].include?(event.key)
